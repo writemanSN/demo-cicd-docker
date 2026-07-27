@@ -44,3 +44,30 @@ jobs:
           context: ./backend
           push: true
           tags: writeman/demo-backend:latest
+
+  deploy:
+    needs: build-and-push-docker
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Déployer sur le serveur
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.IP }}
+          username: ${{ secrets.NAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            docker pull writeman/demo-backend:latest
+            docker stop demo-backend || true
+            docker rm demo-backend || true
+            docker run -d --name demo-backend -p 8080:8080 \
+              -e DB_HOST=host.docker.internal \
+              -e DB_NAME=tester \
+              -e DB_PASSWORD= \
+              writeman/demo-backend:latest
+
+            docker pull writeman/demo-frontend:latest
+            docker stop demo-frontend || true
+            docker rm demo-frontend || true
+            docker run -d --name demo-frontend -p 3000:80 \
+              writeman/demo-frontend:latest
