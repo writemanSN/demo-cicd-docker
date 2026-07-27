@@ -43,4 +43,4 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: writemansn/demo-backend:latest
+          tags: writeman/demo-backend:latest
